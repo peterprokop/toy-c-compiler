@@ -108,9 +108,9 @@ bool tryLexEndOfTaggedComment(const char **source)
     return false;
 }
 
-std::vector<Token> getTokens(const char *inputSource, int &returnValue)
+std::vector<Token *> getTokens(const char *inputSource, int &returnValue)
 {
-    auto tokens = std::vector<Token>();
+    auto tokens = std::vector<Token *>();
     const char *source = inputSource;
     
     while (*source) {
@@ -125,27 +125,27 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
             // Simple tokens
             case '{':
                 logDebug("{");
-                tokens.push_back(OpenBraceToken());
+                tokens.push_back(new OpenBraceToken());
                 source++;
                 continue;
             case '}':
                 logDebug("}");
-                tokens.push_back(CloseBraceToken());
+                tokens.push_back(new CloseBraceToken());
                 source++;
                 continue;
             case '(':
                 logDebug("(");
-                tokens.push_back(OpenParenthesisToken());
+                tokens.push_back(new OpenParenthesisToken());
                 source++;
                 continue;
             case ')':
                 logDebug(")");
-                tokens.push_back(CloseParenthesisToken());
+                tokens.push_back(new CloseParenthesisToken());
                 source++;
                 continue;
             case ';':
                 logDebug(";");
-                tokens.push_back(SemicolonToken());
+                tokens.push_back(new SemicolonToken());
                 source++;
                 continue;
                 
@@ -179,19 +179,19 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         // int, void, return
         if (tryLexToken((char *)"int", source)) {
             logDebug("int");
-            tokens.push_back(IntToken());
+            tokens.push_back(new IntToken());
             source += strlen("int");
             continue;
         }
         if (tryLexToken((char *)"void", source)) {
             logDebug("void");
-            tokens.push_back(VoidToken());
+            tokens.push_back(new VoidToken());
             source += strlen("void");
             continue;
         }
         if (tryLexToken((char *)"return", source)) {
             logDebug("return");
-            tokens.push_back(ReturnToken());
+            tokens.push_back(new ReturnToken());
             source += strlen("return");
             continue;
         }
@@ -199,7 +199,7 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         std::string constant = "";
         if (tryLexConstant(source, &constant)) {
             logDebug("constant");
-            tokens.push_back(ConstantToken(constant));
+            tokens.push_back(new ConstantToken(constant));
             source += constant.size();
             continue;
         }
@@ -207,7 +207,7 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         std::string identifier = "";
         if (tryLexIdentifier(source, &identifier)) {
             logDebug("identifier");
-            tokens.push_back(IdentifierToken(identifier));
+            tokens.push_back(new IdentifierToken(identifier));
             source += identifier.size();
             continue;
         }
@@ -272,9 +272,8 @@ int main(int argc, const char * argv[]) {
     
     int returnValue = 2;
     auto tokens = getTokens(sourceCString, returnValue);
-    // std::cout << "info: tokens lexed: " << tokens.size() << std::endl;
     
-    tryParseProgram(tokens);
+    tryParseProgram(tokens.cbegin(), tokens.cend());
     
     return returnValue;
 }
