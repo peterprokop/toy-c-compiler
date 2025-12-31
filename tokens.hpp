@@ -1,3 +1,4 @@
+// Abstract
 class Token {};
 
 //Identifier [a-zA-Z_]

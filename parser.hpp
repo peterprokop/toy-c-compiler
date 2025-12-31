@@ -1,3 +1,6 @@
+#import "tokens.hpp"
+#import "astnode.hpp"
+
 /*
 EBNF:
 <program> ::= <function>
@@ -7,3 +10,11 @@ EBNF:
 <identifier> ::= ? An identifier token ?
 <int> ::= ? A constant token ?
 */
+
+void tryParseFunction() {
+    
+}
+
+void tryParseProgram(std::vector<Token> tokens) {
+    tryParseFunction();
+}

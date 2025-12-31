@@ -3,9 +3,10 @@
 #import <sstream>
 
 #import "tokens.hpp"
+#import "parser.hpp"
 
 void logDebug(std::string logContent) {
-    // std::cout << logContent << std::endl;
+     // std::cout << logContent << std::endl;
 }
 
 bool isWhiteSpace(const char *source) {
@@ -32,7 +33,7 @@ bool isWordBoundary(const char *source) {
     );
 }
 
-bool tryParse(const char *substring, const char *source, bool shouldEndOnWordBoundary)
+bool tryLex(const char *substring, const char *source, bool shouldEndOnWordBoundary)
 {
     if (strlen(source) < strlen(substring)) {
         return false;
@@ -54,12 +55,12 @@ bool tryParse(const char *substring, const char *source, bool shouldEndOnWordBou
     return true;
 }
 
-bool tryParseToken(const char *token, const char *source)
+bool tryLexToken(const char *token, const char *source)
 {
-    return tryParse(token, source, true);
+    return tryLex(token, source, true);
 }
 
-bool tryParseConstant(const char *source, std::string *constant)
+bool tryLexConstant(const char *source, std::string *constant)
 {
     *constant = "";
     bool gotAtLeastOneCharacter = false;
@@ -77,7 +78,7 @@ bool tryParseConstant(const char *source, std::string *constant)
     return gotAtLeastOneCharacter && isWordBoundary(currentSourceChar);
 }
 
-bool tryParseIdentifier(const char *source, std::string *identifier)
+bool tryLexIdentifier(const char *source, std::string *identifier)
 {
     *identifier = "";
     bool gotAtLeastOneCharacter = false;
@@ -95,10 +96,10 @@ bool tryParseIdentifier(const char *source, std::string *identifier)
     return gotAtLeastOneCharacter && isWordBoundary(currentSourceChar);
 }
 
-bool tryParseEndOfTaggedComment(const char **source)
+bool tryLexEndOfTaggedComment(const char **source)
 {
     while(**source) {
-        if (tryParse((char *)"*/", *source, false)) {
+        if (tryLex((char *)"*/", *source, false)) {
             *source += 2;
             return true;
         }
@@ -153,7 +154,7 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         }
         
         // One-line comments, starting with `//`
-        if (tryParse((char *)"//", source, false)) {
+        if (tryLex((char *)"//", source, false)) {
             logDebug("//");
             // Don't create tokens for comments
             while(source && (*source != '\n')) {
@@ -163,10 +164,10 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         }
         
         // Tagged comments, starting with `/*`
-        if (tryParse((char *)"/*", source, false)) {
+        if (tryLex((char *)"/*", source, false)) {
             logDebug("/*");
             // Don't create tokens for comments
-            if (tryParseEndOfTaggedComment(&source)) {
+            if (tryLexEndOfTaggedComment(&source)) {
                 continue;
             } else {
                 std::cout << "error: `/*` comment is not closed";
@@ -176,19 +177,19 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         }
         
         // int, void, return
-        if (tryParseToken((char *)"int", source)) {
+        if (tryLexToken((char *)"int", source)) {
             logDebug("int");
             tokens.push_back(IntToken());
             source += strlen("int");
             continue;
         }
-        if (tryParseToken((char *)"void", source)) {
+        if (tryLexToken((char *)"void", source)) {
             logDebug("void");
             tokens.push_back(VoidToken());
             source += strlen("void");
             continue;
         }
-        if (tryParseToken((char *)"return", source)) {
+        if (tryLexToken((char *)"return", source)) {
             logDebug("return");
             tokens.push_back(ReturnToken());
             source += strlen("return");
@@ -196,7 +197,7 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         }
         
         std::string constant = "";
-        if (tryParseConstant(source, &constant)) {
+        if (tryLexConstant(source, &constant)) {
             logDebug("constant");
             tokens.push_back(ConstantToken(constant));
             source += constant.size();
@@ -204,7 +205,7 @@ std::vector<Token> getTokens(const char *inputSource, int &returnValue)
         }
         
         std::string identifier = "";
-        if (tryParseIdentifier(source, &identifier)) {
+        if (tryLexIdentifier(source, &identifier)) {
             logDebug("identifier");
             tokens.push_back(IdentifierToken(identifier));
             source += identifier.size();
@@ -271,7 +272,9 @@ int main(int argc, const char * argv[]) {
     
     int returnValue = 2;
     auto tokens = getTokens(sourceCString, returnValue);
-    //std::cout << "info: tokens lexed: " << tokens.size() << std::endl;
+    // std::cout << "info: tokens lexed: " << tokens.size() << std::endl;
+    
+    tryParseProgram(tokens);
     
     return returnValue;
 }
