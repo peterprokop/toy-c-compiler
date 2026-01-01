@@ -239,7 +239,7 @@ int main(int argc, const char * argv[]) {
      bly generation
      --codegen Perform lexing, parsing, and assembly genera-
      tion, but stop before code emission
-     -S eEit an assembly file
+     -S Emit an assembly file
      */
     // Debug command-line flags
     /*
@@ -273,7 +273,8 @@ int main(int argc, const char * argv[]) {
     int returnValue = 2;
     auto tokens = getTokens(sourceCString, returnValue);
     
-    tryParseProgram(tokens.cbegin(), tokens.cend());
+    ProgramASTNode *program = tryParseProgram(tokens.cbegin(), tokens.cend());
+    program->prettyPrint();
     
     return returnValue;
 }

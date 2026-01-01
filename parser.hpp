@@ -21,27 +21,31 @@ bool checkTokenType(Token *token, TokenType tokenType)
     return true;
 }
 
-void tryParseExpression(std::vector<Token *>::const_iterator &begin,
-                        std::vector<Token *>::const_iterator end)
+ExpressionASTNode *tryParseExpression(std::vector<Token *>::const_iterator &begin,
+                                      std::vector<Token *>::const_iterator end)
 {
     checkTokenType(*begin, TokenTypeConstantToken);
+    const std::string stringValue = dynamic_cast<ConstantToken *>(*begin)->constant;    
+    IntASTNode *intASTNode = new IntASTNode(std::stoi(stringValue));
     begin++;
+    return new ExpressionASTNode(intASTNode);
 }
 
-void tryParseStatement(std::vector<Token *>::const_iterator &begin,
-                       std::vector<Token *>::const_iterator end)
+StatementASTNode *tryParseStatement(std::vector<Token *>::const_iterator &begin,
+                                    std::vector<Token *>::const_iterator end)
 {
     checkTokenType(*begin, TokenTypeReturnToken);
     begin++;
     
-    tryParseExpression(begin, end);
+    ExpressionASTNode *expression = tryParseExpression(begin, end);
     
     checkTokenType(*begin, TokenTypeSemicolonToken);
     begin++;
+    return new StatementASTNode(expression);
 }
 
-void tryParseFunction(std::vector<Token *>::const_iterator begin,
-                      std::vector<Token *>::const_iterator end)
+FunctionASTNode *tryParseFunction(std::vector<Token *>::const_iterator begin,
+                                  std::vector<Token *>::const_iterator end)
 {
     if (begin == end) {
         std::cout << "error: no tokens" << std::endl;
@@ -51,6 +55,7 @@ void tryParseFunction(std::vector<Token *>::const_iterator begin,
     begin++;
     
     checkTokenType(*begin, TokenTypeIdentifierToken);
+    const std::string functionName = dynamic_cast<IdentifierToken *>(*begin)->identifier;
     begin++;
     
     checkTokenType(*begin, TokenTypeOpenParenthesisToken);
@@ -65,14 +70,17 @@ void tryParseFunction(std::vector<Token *>::const_iterator begin,
     checkTokenType(*begin, TokenTypeOpenBraceToken);
     begin++;
     
-    tryParseStatement(begin, end);
+    StatementASTNode *statement = tryParseStatement(begin, end);
     
     checkTokenType(*begin, TokenTypeCloseBraceToken);
     begin++;
+    
+    return new FunctionASTNode(functionName, statement);
 }
 
-void tryParseProgram(std::vector<Token *>::const_iterator begin,
-                     std::vector<Token *>::const_iterator end)
+ProgramASTNode *tryParseProgram(std::vector<Token *>::const_iterator begin,
+                                std::vector<Token *>::const_iterator end)
 {
-    tryParseFunction(begin, end);
+    FunctionASTNode *function = tryParseFunction(begin, end);
+    return new ProgramASTNode(function);
 }
