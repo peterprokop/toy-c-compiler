@@ -4,6 +4,7 @@
 
 #import "tokens.hpp"
 #import "parser.hpp"
+#import "tac_node.hpp"
 
 void logDebug(std::string logContent) {
      // std::cout << logContent << std::endl;
