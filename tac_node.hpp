@@ -11,10 +11,16 @@ class TACNode {};
 class InstructionTACNode: public TACNode {};
 class OperandTACNode: public TACNode {};
 
-class ImmOperandTACNode: public TACNode {};
-class RegisterOperandTACNode: public TACNode {};
+class ImmOperandTACNode: public OperandTACNode {
+public:
+    int constant;
+    ImmOperandTACNode(int constant): constant(constant) {};
+};
+class RegisterOperandTACNode: public OperandTACNode {
+    // Only EAX for now
+};
 
-class MovInstructionTACNode: public TACNode {
+class MovInstructionTACNode: public InstructionTACNode {
 public:
     OperandTACNode *src;
     OperandTACNode *dst;
@@ -23,7 +29,7 @@ public:
         :src(src), dst(dst) {};
 };
 
-class RetInstructionTACNode: public TACNode {};
+class RetInstructionTACNode: public InstructionTACNode {};
 
 class FunctionTACNode: public TACNode {
 public:

@@ -4,7 +4,7 @@
 
 #import "tokens.hpp"
 #import "parser.hpp"
-#import "tac_node.hpp"
+#import "tac_converter.hpp"
 
 void logDebug(std::string logContent) {
      // std::cout << logContent << std::endl;
@@ -275,13 +275,16 @@ int main(int argc, const char * argv[]) {
     int returnValue = 2;
     auto tokens = getTokens(sourceCString, returnValue);
     
+    ProgramASTNode *program;
     try {
-        ProgramASTNode *program = tryParseProgram(tokens.cbegin(), tokens.cend());
+        program = tryParseProgram(tokens.cbegin(), tokens.cend());
         program->prettyPrint();
     } catch (...) {
         std::cout << "Terminating due to parse error" << std::endl;
         return 5;
     }
+    
+    auto tacProgram = tryConvertToTAC(program);
     
     return returnValue;
 }
