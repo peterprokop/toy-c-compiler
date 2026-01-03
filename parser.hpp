@@ -47,7 +47,7 @@ StatementASTNode *tryParseStatement(std::vector<Token *>::const_iterator &begin,
     return new StatementASTNode(expression);
 }
 
-FunctionASTNode *tryParseFunction(std::vector<Token *>::const_iterator begin,
+FunctionASTNode *tryParseFunction(std::vector<Token *>::const_iterator &begin,
                                   std::vector<Token *>::const_iterator end)
 {
     if (begin == end) {
@@ -77,7 +77,7 @@ FunctionASTNode *tryParseFunction(std::vector<Token *>::const_iterator begin,
     
     checkTokenType(*begin, TokenTypeCloseBraceToken);
     begin++;
-    
+            
     return new FunctionASTNode(functionName, statement);
 }
 
@@ -85,5 +85,12 @@ ProgramASTNode *tryParseProgram(std::vector<Token *>::const_iterator begin,
                                 std::vector<Token *>::const_iterator end)
 {
     FunctionASTNode *function = tryParseFunction(begin, end);
+    
+    if (begin != end) {
+        std::cout << "error: unexpected token after function body: " << (*begin)->tokenType() << "\n";
+        
+        throw std::invalid_argument("unexpected token after function body");
+    }
+    
     return new ProgramASTNode(function);
 }

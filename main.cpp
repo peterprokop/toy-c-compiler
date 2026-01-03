@@ -6,6 +6,7 @@
 #import "parser.hpp"
 #import "tac_converter.hpp"
 #import "assembly_generator.hpp"
+#import "shell_exec.hpp"
 
 void logDebug(std::string logContent) {
      // std::cout << logContent << std::endl;
@@ -224,6 +225,15 @@ std::vector<Token *> getTokens(const char *inputSource, int &returnValue)
     return tokens;
 }
 
+std::string changeExtension(std::string filePath, std::string newExtension)
+{
+    size_t lastDotIndex = filePath.find_last_of(".");
+    std::string filePathNoExtension = filePath.substr(0, lastDotIndex);
+    return newExtension.length()
+        ? (filePathNoExtension + "." + newExtension)
+        : filePathNoExtension;
+}
+
 /**
  Return values:
  0 - All good
@@ -287,8 +297,17 @@ int main(int argc, const char * argv[]) {
     
     auto tacProgram = tryConvertToTAC(program);
     
-    // On ARM Mac you need to do `arch -x86_64 zsh` first to work with x64 AT&T assembly
-    generateAssembly(tacProgram, std::cout);
+    // Generate assebly and save to `.s` file
+    std::string assemblyFilePath = changeExtension(sourcePath, "s");
+    std::ofstream assemblyFile(assemblyFilePath);
+        
+    generateAssembly(tacProgram, assemblyFile);
+    assemblyFile.close();
+    
+    // Run GCC to create executable file
+    std::string executableFilePath = changeExtension(assemblyFilePath, "");
+    // On ARM Mac you need to do `arch -x86_64` (or `arch -x86_64 zsh` from shell) first to work with x64 AT&T assembly
+    shellExec("arch -x86_64 gcc " + assemblyFilePath + " -o " + executableFilePath);
     
     return returnValue;
 }
