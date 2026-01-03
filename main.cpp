@@ -229,6 +229,7 @@ std::vector<Token *> getTokens(const char *inputSource, int &returnValue)
  2 - Unexpected lexer error
  3 - Unexpected character during lexing
  4 - `/*` comment is not closed
+ 5 - Parse error
  */
 int main(int argc, const char * argv[]) {
     
@@ -273,8 +274,13 @@ int main(int argc, const char * argv[]) {
     int returnValue = 2;
     auto tokens = getTokens(sourceCString, returnValue);
     
-    ProgramASTNode *program = tryParseProgram(tokens.cbegin(), tokens.cend());
-    program->prettyPrint();
+    try {
+        ProgramASTNode *program = tryParseProgram(tokens.cbegin(), tokens.cend());
+        program->prettyPrint();
+    } catch (...) {
+        std::cout << "Terminating due to parse error" << std::endl;
+        return 5;
+    }
     
     return returnValue;
 }

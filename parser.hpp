@@ -16,6 +16,9 @@ bool checkTokenType(Token *token, TokenType tokenType)
     if (token->tokenType() != tokenType) {
         std::cout << "error: unexpected token type:" << token->tokenType()
         << " expected:" << tokenType << std::endl;
+        
+        throw std::invalid_argument("unexpected token type");
+        
         return false;
     }
     return true;
@@ -25,7 +28,7 @@ ExpressionASTNode *tryParseExpression(std::vector<Token *>::const_iterator &begi
                                       std::vector<Token *>::const_iterator end)
 {
     checkTokenType(*begin, TokenTypeConstantToken);
-    const std::string stringValue = dynamic_cast<ConstantToken *>(*begin)->constant;    
+    const std::string stringValue = dynamic_cast<ConstantToken *>(*begin)->constant;
     IntASTNode *intASTNode = new IntASTNode(std::stoi(stringValue));
     begin++;
     return new ExpressionASTNode(intASTNode);
