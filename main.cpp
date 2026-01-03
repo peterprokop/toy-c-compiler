@@ -5,6 +5,7 @@
 #import "tokens.hpp"
 #import "parser.hpp"
 #import "tac_converter.hpp"
+#import "assembly_generator.hpp"
 
 void logDebug(std::string logContent) {
      // std::cout << logContent << std::endl;
@@ -285,6 +286,9 @@ int main(int argc, const char * argv[]) {
     }
     
     auto tacProgram = tryConvertToTAC(program);
+    
+    // On ARM Mac you need to do `arch -x86_64 zsh` first to work with x64 AT&T assembly
+    generateAssembly(tacProgram, std::cout);
     
     return returnValue;
 }
