@@ -7,33 +7,10 @@
 #import "tac_converter.hpp"
 #import "assembly_generator.hpp"
 #import "shell_exec.hpp"
+#import "string_utils.hpp"
 
 void logDebug(std::string logContent) {
      // std::cout << logContent << std::endl;
-}
-
-bool isWhiteSpace(const char *source) {
-    return *source == ' '
-        || *source == '\t'
-        || *source == '\n';
-}
-
-bool isNumeric(const char *source) {
-    return (*source >= '0') && (*source <= '9');
-}
-
-bool isAlpha(const char *source) {
-    return ((*source >= 'a') && (*source <= 'z'))
-        || ((*source >= 'A') && (*source <= 'Z'))
-        || (*source == '_');
-}
-
-bool isWordBoundary(const char *source) {
-    return isWhiteSpace(source)
-    || (
-        !isAlpha(source)
-        && !isNumeric(source)
-    );
 }
 
 bool tryLex(const char *substring, const char *source, bool shouldEndOnWordBoundary)
@@ -225,15 +202,6 @@ std::vector<Token *> getTokens(const char *inputSource, int &returnValue)
     return tokens;
 }
 
-std::string changeExtension(std::string filePath, std::string newExtension)
-{
-    size_t lastDotIndex = filePath.find_last_of(".");
-    std::string filePathNoExtension = filePath.substr(0, lastDotIndex);
-    return newExtension.length()
-        ? (filePathNoExtension + "." + newExtension)
-        : filePathNoExtension;
-}
-
 /**
  Return values:
  0 - All good
@@ -306,7 +274,8 @@ int main(int argc, const char * argv[]) {
     
     // Run GCC to create executable file
     std::string executableFilePath = changeExtension(assemblyFilePath, "");
-    // On ARM Mac you need to do `arch -x86_64` (or `arch -x86_64 zsh` from shell) first to work with x64 AT&T assembly
+    // On ARM Mac you need to do `arch -x86_64` (or `arch -x86_64 zsh` from shell)
+    // first to work with x64 AT&T assembly
     shellExec("arch -x86_64 gcc " + assemblyFilePath + " -o " + executableFilePath);
     
     return returnValue;
